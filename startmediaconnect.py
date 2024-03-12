@@ -4,7 +4,7 @@ mediaconnect_client = boto3.client("mediaconnect")
 
 
 def start_mediaconnect_flow(arn):
-    response = mediaconnect_client.start_flow(
+    mediaconnect_client.start_flow(
         FlowArn=arn
     )
     print("service started")
