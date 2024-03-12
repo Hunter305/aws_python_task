@@ -18,8 +18,8 @@ def stop_channel(channel_id):
         else:
             print("error starting the channel with status :" +
                   response["State"])
-    except Exception:
-        print("there was an error")
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
 
 
 channel_id = "5731283"
