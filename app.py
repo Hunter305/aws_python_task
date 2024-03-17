@@ -16,6 +16,18 @@ def list_channel():
     except Exception as e:
         return jsonify({"message": f"An error occurred: {str(e)}"}), 500
 
+# channel description
+
+
+@app.route("/api/medialive/<channelid>", methods=["GET"])
+def start_channel(channelid):
+    try:
+        response = media_client.describe_channel(ChannelId=channelid)
+        jsonify({"response": response}), 200
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+        return jsonify({"message": f"An error occurred: {str(e)}"}), 500
+
 # start a channel
 
 
@@ -38,14 +50,14 @@ def start_channel(channelid):
 
 
 @app.route("/api/medialive/<channelid>/stop", methods=["POST"])
-def stop_channel(channel_id):
+def stop_channel(channelid):
     try:
         response = media_client.describe_channel(
-            ChannelId=channel_id
+            ChannelId=channelid
         )
         if response["State"] == "RUNNING":
             media_client.stop_channel(
-                ChannelId=channel_id
+                ChannelId=channelid
             )
             return jsonify({"message": "channel has been stopped"}), 200
         elif response["State"] == "IDLE":
@@ -53,6 +65,8 @@ def stop_channel(channel_id):
         else:
             return jsonify({"message": "error starting the channel with status :" +
                             response["State"]}), 400
+    # except NotFoundException as nf:
+    #     return jsonify({"message": "channel not found"}), 404
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
         return jsonify({"message": f"An error occurred: {str(e)}"}), 500
