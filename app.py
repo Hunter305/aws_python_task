@@ -74,6 +74,8 @@ def stop_channel(channelid):
 
 # media connect client endpoints
 
+# get all media connect flow
+
 
 @app.route("/api/mediaconnect", methods=["GET"])
 def list_flow():
@@ -81,4 +83,16 @@ def list_flow():
         response = mediaconnect_client.list_flows()
         return jsonify({"flows": response["FLOWS"]}), 200
     except Exception as e:
+        return jsonify({"message": f"An error occurred: {str(e)}"}), 500
+
+# describe a media connect flow
+
+
+@app.route("/api/mediaconnect/<flowArn>", methods=["GET"])
+def get_media_flow(flowArn):
+    try:
+        response = mediaconnect_client.describe_flow(FlowArn=flowArn)
+        jsonify({"response": response}), 200
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
         return jsonify({"message": f"An error occurred: {str(e)}"}), 500
