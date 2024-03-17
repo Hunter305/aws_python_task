@@ -3,6 +3,7 @@ import boto3
 import logging
 
 media_client = boto3.client("medialive")
+mediaconnect_client = boto3.client("mediaconnect")
 
 app = Flask(__name__)
 
@@ -20,7 +21,7 @@ def list_channel():
 
 
 @app.route("/api/medialive/<channelid>", methods=["GET"])
-def start_channel(channelid):
+def get_channel(channelid):
     try:
         response = media_client.describe_channel(ChannelId=channelid)
         jsonify({"response": response}), 200
@@ -69,4 +70,15 @@ def stop_channel(channelid):
     #     return jsonify({"message": "channel not found"}), 404
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
+        return jsonify({"message": f"An error occurred: {str(e)}"}), 500
+
+# media connect client endpoints
+
+
+@app.route("/api/mediaconnect", methods=["GET"])
+def list_flow():
+    try:
+        response = mediaconnect_client.list_flows()
+        return jsonify({"flows": response["FLOWS"]}), 200
+    except Exception as e:
         return jsonify({"message": f"An error occurred: {str(e)}"}), 500
