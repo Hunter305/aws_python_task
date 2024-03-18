@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 import boto3
+import botocore.exceptions as botoException
 import logging
 
 media_client = boto3.client("medialive")
@@ -43,6 +44,11 @@ def start_channel(channelid):
             return jsonify({"message": "channel is ALREADY running"}), 200
         else:
             return jsonify({"message": "Error starting the channel with status: " + response["State"]}), 400
+    except botoException.ClientError as error:
+        if error.response['Error']['Code'] == 'NotFoundException':
+            return jsonify({"message": "channel not found"})
+        else:
+            return jsonify({"message": "there was client error"})
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
         return jsonify({"message": f"An error occurred: {str(e)}"}), 500
