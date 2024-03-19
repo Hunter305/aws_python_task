@@ -102,3 +102,15 @@ def get_media_flow(flowArn):
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
         return jsonify({"message": f"An error occurred: {str(e)}"}), 500
+
+
+s3_client = boto3.client("s3")
+
+
+@app.route("/api/s3", methods=["GET"])
+def get_s3():
+    try:
+        response = s3_client.list_buckets()
+        return jsonify({"response": response["Buckets"]}), 200
+    except Exception as e:
+        return jsonify({"message": f"there was an error with error message {str(e)}"}), 500
