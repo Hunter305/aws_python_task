@@ -2,14 +2,17 @@ from flask import Flask, jsonify
 import boto3
 import botocore.exceptions as botoException
 import logging
+from flask_cors import CORS
 
 media_client = boto3.client("medialive")
 mediaconnect_client = boto3.client("mediaconnect")
 
 app = Flask(__name__)
 
-
+CORS(app)
 # list all the channel
+
+
 @app.route("/api/medialive", methods=["GET"])
 def list_channel():
     try:
