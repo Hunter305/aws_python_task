@@ -1,8 +1,10 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import boto3
 import botocore.exceptions as botoException
 import logging
 from flask_cors import CORS
+import subprocess
+import os
 
 media_client = boto3.client("medialive")
 mediaconnect_client = boto3.client("mediaconnect")
@@ -117,3 +119,33 @@ def get_s3():
         return jsonify({"response": response["Buckets"]}), 200
     except Exception as e:
         return jsonify({"message": f"there was an error with error message {str(e)}"}), 500
+
+
+@app.route('/run-aws-command', methods=['POST'])
+def run_aws_command():
+    data = request.json
+    aws_access_key_id = data.get('aws_access_key_id')
+    aws_secret_access_key = data.get('aws_secret_access_key')
+    aws_session_token = data.get('aws_session_token')
+
+    os.environ['AWS_ACCESS_KEY_ID'] = aws_access_key_id
+    os.environ['AWS_SECRET_ACCESS_KEY'] = aws_secret_access_key
+    if aws_session_token:
+        os.environ['AWS_SESSION_TOKEN'] = aws_session_token
+
+    command = "aws s3 ls"
+
+    try:
+        result = subprocess.check_output(
+            command, shell=True, stderr=subprocess.STDOUT)
+        os.environ.pop('AWS_ACCESS_KEY_ID', None)
+        os.environ.pop('AWS_SECRET_ACCESS_KEY', None)
+        os.environ.pop('AWS_SESSION_TOKEN', None)
+
+        return jsonify({'output': result.decode('utf-8')}), 200
+    except subprocess.CalledProcessError as e:
+        os.environ.pop('AWS_ACCESS_KEY_ID', None)
+        os.environ.pop('AWS_SECRET_ACCESS_KEY', None)
+        os.environ.pop('AWS_SESSION_TOKEN', None)
+
+        return jsonify({'error': 'Failed to execute command', 'details': e.output.decode('utf-8')}), 400
