@@ -1,3 +1,4 @@
+from flask import Flask, request, jsonify
 from flask import Flask, jsonify, request
 import boto3
 import botocore.exceptions as botoException
@@ -149,3 +150,27 @@ def run_aws_command():
         os.environ.pop('AWS_SESSION_TOKEN', None)
 
         return jsonify({'error': 'Failed to execute command', 'details': e.output.decode('utf-8')}), 400
+
+
+app = Flask(__name__)
+
+
+@app.route('/set-aws-creds', methods=['POST'])
+def set_aws_creds():
+    # Assuming you're sending a JSON payload with the AWS credentials
+    data = request.json
+    aws_access_key_id = data.get('aws_access_key_id')
+    aws_secret_access_key = data.get('aws_secret_access_key')
+
+    if not aws_access_key_id or not aws_secret_access_key:
+        return jsonify({"error": "Please provide both 'aws_access_key_id' and 'aws_secret_access_key'"}), 400
+
+    # Set the environment variables
+    os.environ['AWS_ACCESS_KEY_ID'] = aws_access_key_id
+    os.environ['AWS_SECRET_ACCESS_KEY'] = aws_secret_access_key
+
+    return jsonify({"message": "AWS credentials set successfully"}), 200
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
