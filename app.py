@@ -172,5 +172,27 @@ def set_aws_creds():
     return jsonify({"message": "AWS credentials set successfully"}), 200
 
 
+@app.route("/clone", methods=["POST"])
+def forward_request():
+    # Extract min and max params from the incoming request to www.b.com
+    min_id = request.args.get('min', 1)
+    max_id = request.args.get('max', 10)
+
+    # Example cookie extracted from Postman or a browser
+    cookies = {
+        'session': 'your-session-cookie-value-here'
+    }
+
+    # Loop through the range of IDs and make POST requests to www.a.com/api/id
+    for id in range(int(min_id), int(max_id) + 1):
+        response = requests.post(f'http://www.a.com/api/{id}', cookies=cookies)
+
+        # Check if the response is successful (you may want to add additional error handling)
+        if response.status_code != 200:
+            return jsonify({'error': 'Failed to forward request', 'id': id}), 500
+
+    return jsonify({'status': 'success'}), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True)
