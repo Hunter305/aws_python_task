@@ -6,6 +6,7 @@ import logging
 from flask_cors import CORS
 import subprocess
 import os
+import requests
 
 media_client = boto3.client("medialive")
 mediaconnect_client = boto3.client("mediaconnect")
