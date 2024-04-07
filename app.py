@@ -194,6 +194,29 @@ def forward_request():
 
     return jsonify({'status': 'success'}), 200
 
+@app.route('/update_password', methods=['POST'])
+@jwt_required()
+def update_password():
+    user_identity = get_jwt_identity()
+    user = User.query.filter_by(username=user_identity).first()
+    
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    data = request.get_json()
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+    
+    # Verify the old password
+    if not bcrypt.check_password_hash(user.password, old_password):
+        return jsonify({"msg": "Old password is incorrect"}), 401
+    
+    # Hash the new password and update it
+    hashed_new_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+    user.password = hashed_new_password
+    db.session.commit()
+    
+    return jsonify({"msg": "Password updated successfully"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
