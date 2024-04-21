@@ -16,7 +16,7 @@ app = Flask(__name__)
 CORS(app)
 # list all the channel
 
-
+#also done using mulitplre
 @app.route("/api/medialive", methods=["GET"])
 def list_channel():
     try:
